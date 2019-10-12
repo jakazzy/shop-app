@@ -1,10 +1,10 @@
-// MONGODB PWD: stbf6CKIQoicpx7r
-// Connection string: mongodb+srv://jida:<password>@cluster0-d9wpy.mongodb.net/test?retryWrites=true&w=majority
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 
 const app = express();
+const Thing = require("./models/thing");
+
 mongoose
   .connect(
     "mongodb+srv://jida:stbf6CKIQoicpx7r@cluster0-d9wpy.mongodb.net/test?retryWrites=true&w=majority"
@@ -29,12 +29,29 @@ app.use((req, res, next) => {
 });
 
 app.use(bodyParser.json());
+
 app.post("/api/stuff", (req, res, next) => {
-  console.log(req.body);
-  res.status(201).json({
-    message: "Thing created successfully!"
+  const thing = new Thing({
+    title: req.body.title,
+    description: req.body.description,
+    imageUrl: req.body.imageUrl,
+    price: req.body.price,
+    userId: req.body.userId
   });
+  thing
+    .save()
+    .then(() => {
+      return res.status(201).json({
+        message: "Post saved successfully!"
+      });
+    })
+    .catch(error => {
+      return res.status(400).json({
+        error: error
+      });
+    });
 });
+
 app.use("/api/stuff", (req, res, next) => {
   const stuff = [
     {
@@ -56,7 +73,7 @@ app.use("/api/stuff", (req, res, next) => {
       userId: "akhfuiaon8y"
     }
   ];
-  res.status(200).json(stuff);
+  return res.status(200).json(stuff);
   next();
 });
 module.exports = app;
